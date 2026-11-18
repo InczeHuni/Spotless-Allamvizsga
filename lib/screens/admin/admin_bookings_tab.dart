@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/booking_model.dart';
 import '../../services/booking_service.dart';
+import '../../services/notification_service.dart';
 
 class AdminBookingsTab extends StatefulWidget {
   const AdminBookingsTab({super.key});
@@ -70,6 +71,12 @@ class _AdminBookingsTabState extends State<AdminBookingsTab> {
                               final t = await showTimePicker(
                                 context: context,
                                 initialTime: selectedTime,
+                                builder: (context, child) {
+                                  return MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                    child: child!,
+                                  );
+                                },
                               );
                               if (t != null) setDialogState(() => selectedTime = t);
                             },
@@ -298,7 +305,14 @@ class _AdminBookingsTabState extends State<AdminBookingsTab> {
                         ),
                         onPressed: booking.isCompleted
                             ? null
-                            : () => _bookingService.updateBookingStatus(booking.id, 'completed'),
+                            : () async {
+                                await _bookingService.updateBookingStatus(booking.id, 'completed');
+                                await NotificationService().showNotification(
+                                  id: booking.id.hashCode,
+                                  title: 'Spotless - Elkészült az autód! ✨',
+                                  body: 'Kedves ${booking.userName}, a(z) ${booking.carDetails} autó mosása befejeződött és átvehető a gyergyószentmiklósi mosóban!',
+                                );
+                              },
                         child: const FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text('Befejezve', maxLines: 1),
@@ -314,7 +328,9 @@ class _AdminBookingsTabState extends State<AdminBookingsTab> {
                         ),
                         onPressed: booking.isConfirmed
                             ? null
-                            : () => _bookingService.updateBookingStatus(booking.id, 'confirmed'),
+                            : () async {
+                                await _bookingService.updateBookingStatus(booking.id, 'confirmed');
+                              },
                         child: const FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text('Megerősítve', maxLines: 1),
@@ -330,7 +346,15 @@ class _AdminBookingsTabState extends State<AdminBookingsTab> {
                         ),
                         onPressed: booking.isCancelled
                             ? null
-                            : () => _bookingService.updateBookingStatus(booking.id, 'cancelled'),
+                            : () async {
+                                await _bookingService.updateBookingStatus(booking.id, 'cancelled');
+                                await NotificationService().cancelReminder(booking.startTime.millisecondsSinceEpoch ~/ 1000);
+                                await NotificationService().showNotification(
+                                  id: booking.id.hashCode,
+                                  title: 'Spotless - Foglalás Törölve ❌',
+                                  body: 'A(z) ${booking.carDetails} autóra szóló foglalásod lemondásra került.',
+                                );
+                              },
                         child: const FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text('Lemondás', maxLines: 1),

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'models/user_model.dart';
 import 'services/auth_service.dart';
+import 'services/notification_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/client/client_home_screen.dart';
@@ -14,6 +15,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationService().init();
   runApp(const SpotlessApp());
 }
 

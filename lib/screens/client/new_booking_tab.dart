@@ -8,6 +8,7 @@ import '../../services/car_service.dart';
 import '../../services/service_service.dart';
 import '../../services/booking_service.dart';
 import '../../services/closed_day_service.dart';
+import '../../services/notification_service.dart';
 import '../../utils/license_plate_validator.dart';
 
 class NewBookingTab extends StatefulWidget {
@@ -154,6 +155,21 @@ class _NewBookingTabState extends State<NewBookingTab> {
         price: _selectedService!.price,
         startTime: startTime,
         durationMinutes: _selectedService!.durationMinutes,
+      );
+
+      // Azonnali Push értesítés és időzített emlékeztető
+      final notifId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await NotificationService().showNotification(
+        id: notifId,
+        title: 'Foglalás Sikeres! 🚗',
+        body: 'Időpontod megerősítve: ${_selectedService!.name} ($carDetails). Köszönjük, hogy a Spotless-t választottad!',
+      );
+
+      await NotificationService().scheduleBookingReminder(
+        bookingIdHash: startTime.millisecondsSinceEpoch ~/ 1000,
+        serviceName: _selectedService!.name,
+        carDetails: carDetails,
+        startTime: startTime,
       );
 
       if (mounted) {
@@ -433,6 +449,12 @@ class _NewBookingTabState extends State<NewBookingTab> {
                             final picked = await showTimePicker(
                               context: context,
                               initialTime: _selectedTime,
+                              builder: (context, child) {
+                                return MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                  child: child!,
+                                );
+                              },
                             );
                             if (picked != null) {
                               setState(() => _selectedTime = picked);
