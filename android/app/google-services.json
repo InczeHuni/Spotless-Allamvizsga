@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "894147741287",
+    "project_id": "spotless-allamvizsga",
+    "storage_bucket": "spotless-allamvizsga.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894147741287:android:ecaa512099b68cd4c276c2",
+        "android_client_info": {
+          "package_name": "com.example.spotless"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeW2BjOUD9AC5JdwYVI518CKiyAV4L4sY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
