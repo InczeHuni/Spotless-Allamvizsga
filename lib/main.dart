@@ -23,30 +23,65 @@ class SpotlessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Spotless - Autómosó Időpontfoglaló',
+      title: 'Spotless - Autómosó Időpontfoglalás',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0284C7),
-          primary: const Color(0xFF0284C7),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0B0F19),
+        colorScheme: ColorScheme.dark(
+          primary: const Color(0xFF38BDF8),
+          secondary: const Color(0xFF0284C7),
+          surface: const Color(0xFF111827),
+          primaryContainer: const Color(0xFF0369A1),
+          onSurface: const Color(0xFFF8FAFC),
+        ),
+        cardTheme: CardThemeData(
+          color: const Color(0xFF111827),
+          elevation: 3,
+          shadowColor: Colors.black.withAlpha(100),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0B0F19),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: const Color(0xFF1E293B),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
+          hintStyle: const TextStyle(color: Color(0xFF64748B)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0284C7),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF38BDF8),
+            foregroundColor: const Color(0xFF0B0F19),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF111827),
+          selectedItemColor: Color(0xFF38BDF8),
+          unselectedItemColor: Color(0xFF94A3B8),
         ),
       ),
       home: const AuthWrapper(),
@@ -68,7 +103,6 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: authService.authStateChanges,
       builder: (context, authSnapshot) {
-        // Betöltés állapota
         if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
@@ -77,12 +111,11 @@ class AuthWrapper extends StatelessWidget {
 
         final firebaseUser = authSnapshot.data;
 
-        // Ha nincs bejelentkezve senki -> LoginScreen
+
         if (firebaseUser == null) {
           return const LoginScreen();
         }
 
-        // Ha be van jelentkezve -> Firestore szerepkör (`role`) lekérése StreamBuilder-rel
         return StreamBuilder<UserModel?>(
           stream: authService.getUserStream(firebaseUser.uid),
           builder: (context, userSnapshot) {
@@ -94,7 +127,6 @@ class AuthWrapper extends StatelessWidget {
 
             final userModel = userSnapshot.data;
 
-            // Ha valamiért még nem létezik a Firestore dokumentum, mutassunk töltést
             if (userModel == null) {
               return const Scaffold(
                 body: Center(
@@ -110,7 +142,7 @@ class AuthWrapper extends StatelessWidget {
               );
             }
 
-            // Szerepkör-alapú navigáció: Admin vs Client
+
             if (userModel.isAdmin) {
               return AdminHomeScreen(user: userModel);
             } else {
